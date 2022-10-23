@@ -1,6 +1,13 @@
 <img src="AlphaMine Logo.png" style="width:885px;height:497px;">
 <hr>
 
+<h3>About</h3>
+<p>AlphaMine was created in October 2022 as a submission for <a href="https://hack.gt/">HackGT 9</a>. It won 1st place for the Cheat Code Hacks category.</p>
+<p>As part of the hackathon submission, we had to create a video describing and demonstrating the project. It can be found here: <a href="https://youtu.be/XOqa3jKWRCw">AlphaMine Video</a></p>
+
+<hr size="2">
+
+
 <h3>Problem Statement</h3>
 <p> <i>"Data is the new Oil." - Clive Humby </i> <br> Machine Learning has gained traction in recent years. However, training and validating machine learning requires the availability of labeled data at scale. The new demands of data ensure that data collection will always be a consistent struggle.
 <br>
@@ -13,6 +20,8 @@ Enter the AlphaMine. Our framework allows users to simply enter keywords and our
 
 
 <hr size="2">
+
+
 <h3>Text Mining</h3>
 <p>Text Mining can be extremely useful for Natural Language Processing applications. With easy dataset generation, sophisticated models like GPT-3 will become more accessible to a wider audience.</p>
 <ul>
