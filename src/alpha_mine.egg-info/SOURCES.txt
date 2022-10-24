@@ -1,0 +1,10 @@
+LICENSE.txt
+README.md
+pyproject.toml
+src/alpha_mine/__init__.py
+src/alpha_mine/abstractions.py
+src/alpha_mine/mine_data.py
+src/alpha_mine.egg-info/PKG-INFO
+src/alpha_mine.egg-info/SOURCES.txt
+src/alpha_mine.egg-info/dependency_links.txt
+src/alpha_mine.egg-info/top_level.txt
