@@ -36,6 +36,12 @@ ln = net.getLayerNames()
 ln = [ln[i - 1] for i in net.getUnconnectedOutLayers()]
 
 
+def create_file(path):
+    try:
+        open(path, 'x')
+    except:
+        pass
+
 def load_image(path, class_name, name):
     global img, img0, outputs, ln
     img0 = cv.imread(path)
@@ -74,14 +80,10 @@ def parse_file_structure():
             list_root = str(root).split('\\')
             data.append(load_image(temp, list_root[-1], name))
     encoder = JSONEncoder()
-    try:
-        open('data/image_meta.json', 'x')
-    except:
-        pass
+    create_file('data/image_meta.json')
     with open('data/image_meta.json', 'w') as file:
         file.write(encoder.encode(data))
     pprint(data)
-
 
 
 def setup(classes):
@@ -91,7 +93,7 @@ def setup(classes):
         pass
     for c in classes:
         try:
-            os.mkdir('data/{}'.format(c))
+            os.mkdir('data/{}'.format(c.replace(' ', '_')))
         except:
             pass
 
@@ -150,59 +152,52 @@ def get_page_text(link):
 def mine_text(classes, num_pages):
     setup(classes)
     start = time.time()
-    num_results = 0
     summary = {}
     encoder = JSONEncoder()
 
     # SEARCH AND SCRAPE
     for query in classes:
+        num_results = 0
         text = ''
         links = []
-        soup = get_search_results(URL.format(query))
+        soup = get_search_results(URL.format(query.replace(' ', '_')))
         results = soup.find_all(name='li', attrs={'class': 'b_algo'})
         summary[query] = []
 
-        if len(results) > num_pages:
-            pages = soup.find_all(name='a', attrs={'class': 'b_widePag sb_bp'})
-            for page in pages:
-                soup = get_search_results(BASE + page['href'])
-                results += soup.find_all(name='li', attrs={'class': 'b_algo'})
-                if len(results) > num_pages:
-                    break
-
-        if len(results) > num_pages:
-            results = results[:num_pages]
+        pages = soup.find_all(name='a', attrs={'class': 'b_widePag sb_bp'})
+        for page in pages:
+            soup = get_search_results(BASE + page['href'])
+            results += soup.find_all(name='li', attrs={'class': 'b_algo'})
 
         for result in results:
-            num_results += 1
-            d = {}
             h = result.find_next(name='h2')
-            d['title'] = h.get_text()
             links.append(h.find_next(name='a')['href'])
-            d['link'] = links[-1]
+            d = {
+                 'title': h.get_text(),
+                 'link': links[-1]
+            }
             summary[query].append(d)
 
         for link in links:
-            text += get_page_text(link)
+            link_text = get_page_text(link)
+            if len(link_text) > 0:
+                text += link_text
+                num_results += 1
+            if num_results == num_pages:
+                break
 
         try:
             os.mkdir('data/{}'.format(query))
         except:
             pass
-        try:
-            open('data/{}/text.txt'.format(query), 'x')
-        except:
-            pass
+        create_file('data/{}/text.txt'.format(query))
         with open('data/{}/text.txt'.format(query), 'w') as file:
             file.write(text)
 
         print('class: {}\tresults collected: {}\ttime: {}s'.format(query, num_results, time.time() - start))
 
     # JSON SUMMARY
-    try:
-        open('data/text_summary.json', 'x')
-    except:
-        pass
+    create_file('data/text_summary.json')
     with open('data/text_summary.json', 'w') as file:
         file.write(encoder.encode(summary))
 
@@ -215,7 +210,7 @@ def mine_image(classes, numExamples, size, performGrayscale):
     for query in classes:
         summary[query] = []
         toDel = []
-        req = request.Request(url=IMG_URL.format(query.replace('_', '+')), headers=headers)
+        req = request.Request(url=IMG_URL.format(query.replace(' ', '+')), headers=headers)
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         try:
             driver.get(IMG_URL.format(query.replace('_', '+')))
@@ -239,10 +234,10 @@ def mine_image(classes, numExamples, size, performGrayscale):
                         driver.execute_script("window.scrollBy(0,document.body.scrollHeight);", "")
                         driver.execute_script('window.scrollBy(0, -300);', '')
                         time.sleep(1)
-                        scrolls += 1;
+                        scrolls += 1
                     break
                 scrolls += 1
-            resp = driver.page_source;
+            resp = driver.page_source
         except:
             pass
         else:
@@ -255,8 +250,8 @@ def mine_image(classes, numExamples, size, performGrayscale):
                 tag.decompose()
             images_data = soup.find_all("a", {"class": "iusc"})
 
-            counter = 0;
-            images_stored = 0;
+            counter = 0
+            images_stored = 0
             # goes through class samples
             while (images_stored < numExamples):
                 image_link = images_data[counter]
@@ -312,11 +307,7 @@ def mine_image(classes, numExamples, size, performGrayscale):
                             pass
                         else:
                             path = './data/{}/{}.{}'.format(query, "img" + str(counter), ext)
-                            try:
-                                open(path, 'x')
-                            except:
-                                print("File could not be created.")
-                                pass
+                            create_file(path)
                             with open(path, 'wb') as file:
                                 file.write(image_resp.read())
                                 image_resp.close()
@@ -338,10 +329,7 @@ def mine_image(classes, numExamples, size, performGrayscale):
             os.remove(rm)
         print('class: {}\tresults collected: {}\ttime: {}s'.format(query, images_stored, time.time() - start))
     # JSON SUMMARY
-    try:
-        open('data/image_summary.json', 'x')
-    except:
-        pass
+    create_file('data/image_summary.json')
     with open('data/image_summary.json', 'w') as file:
         file.write(encoder.encode(summary))
 

@@ -42,5 +42,4 @@ def collect_data():
 
 if __name__ == '__main__':
     collect_data()
-    # parse_file_structure()
     print('process complete')
